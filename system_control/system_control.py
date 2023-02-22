@@ -6,9 +6,13 @@ import argparse
 
 from vosk import Model, KaldiRecognizer
 
-from system_control.hand_movements.mouse_control import MouseControl
+from .processor import Processor
 
 q = queue.Queue()
+
+
+def process(result):
+    pass
 
 
 def callback(indata, frames, time, status):
@@ -39,21 +43,23 @@ def main():
                 audio_idx = idx
                 sample_rate = devices[idx]['default_samplerate']
     else:
-        print("No microphone provided... Using default.")
+        print('No microphone provided... Using default.')
 
-    device_info = sd.query_devices(audio_idx, "input")
-    sample_rate = device_info["default_samplerate"]
+    device_info = sd.query_devices(audio_idx, 'input')
+    sample_rate = device_info['default_samplerate']
     model = Model(args.model)
 
-    with sd.RawInputStream(samplerate=sample_rate, blocksize=8092, device=audio_idx, dtype="int16", channels=1, callback=callback):
+    with sd.RawInputStream(samplerate=sample_rate, blocksize=8092, device=audio_idx, dtype='int16', channels=1, callback=callback):
         rec = KaldiRecognizer(model, sample_rate)
+        rec.SetWords(True)
+        rec.SetMaxAlternatives(20)
+
         while True:
             data = q.get()
             if rec.AcceptWaveform(data):
-                result = json.loads(rec.Result())
-                if result["text"] == "activate hand tracking":
-                    MouseControl().start()
+                Processor(json.loads(rec.Result())).process()
             else:
                 partial = json.loads(rec.PartialResult())['partial']
+                partial = partial[4:] if partial[0:3] == 'the' else partial
                 if partial != '':
                     print(partial)
