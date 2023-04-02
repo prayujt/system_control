@@ -14,8 +14,11 @@ class VolumeControl(MovementTracker):
     center_tracking_landmarks = set({0, 9, 13})
     volume_tracking_landmarks = set({4, 8})
 
+    def __init__(self, camera_index):
+        self.camera_index = camera_index
+
     def start(self):
-        cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture(int(self.camera_index))
         mp_hands = mp.solutions.hands
         hands = mp_hands.Hands(min_detection_confidence=0.75)
         mp_draw = mp.solutions.drawing_utils

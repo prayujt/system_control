@@ -2,11 +2,13 @@
 
 from system_control.movement_trackers.mouse_control import MouseControl
 from system_control.movement_trackers.volume_control import VolumeControl
+from system_control.actions import ActionsProcessor
 
 
 class Processor():
-    def __init__(self, data):
+    def __init__(self, data, camera_index):
         self.data = data
+        self.camera_index = camera_index
 
     def gather(self):
         possible_words = set()
@@ -24,10 +26,13 @@ class Processor():
         print()
 
         if self.match(possible_words, 'mouse control'):
-            MouseControl().start()
+            MouseControl().start(self.camera_index)
 
         elif self.match(possible_words, 'volume control'):
-            VolumeControl().start()
+            VolumeControl().start(self.camera_index)
+
+        else:
+            ActionsProcessor(possible_words).process()
 
     def match(self, possible_words, phrase):
         words = phrase.split(' ')

@@ -13,13 +13,13 @@ class MouseControl(MovementTracker):
     center_tracking_landmarks = set({0, 9, 13})
     closed_tracking_landmarks = set({4, 8, 12, 16, 20})
 
-    def start(self):
-        cap = cv2.VideoCapture(0)
+    def start(self, camera_index):
+        cap = cv2.VideoCapture(int(camera_index))
         mp_hands = mp.solutions.hands
         hands = mp_hands.Hands(min_detection_confidence=0.75)
         mp_draw = mp.solutions.drawing_utils
         p_time = 0
-        start_time = time.time()
+        # start_time = time.time()
 
         avg_center_x_prev, avg_center_y_prev = 0, 0
 
@@ -34,10 +34,10 @@ class MouseControl(MovementTracker):
             results = hands.process(image_rgb)
 
             if results.multi_hand_landmarks:
-                if len(results.multi_hand_landmarks) > 1 and time.time() - start_time < 3:
+                if len(results.multi_hand_landmarks) > 1:
                     continue
-                elif len(results.multi_hand_landmarks) > 1:
-                    break
+                # elif len(results.multi_hand_landmarks) > 1:
+                    # break
 
                 for handLms in results.multi_hand_landmarks:
                     avg_center_x, avg_center_y = 0, 0
@@ -71,5 +71,5 @@ class MouseControl(MovementTracker):
             else:
                 avg_center_x_prev, avg_center_y_prev = 0, 0
 
-            # cv2.imshow("cv2", image)
-            # cv2.waitKey(1)
+            cv2.imshow("cv2", image)
+            cv2.waitKey(1)
